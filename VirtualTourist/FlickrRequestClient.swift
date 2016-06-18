@@ -9,8 +9,9 @@
 import Foundation
 import CoreLocation
 import CoreFoundation
+import CoreData
 
-class FlickrRequestClient: NSObject{
+class FlickrRequestClient: NSObject {
     
     var session: NSURLSession
     var pin: PinModel? = nil
@@ -22,17 +23,15 @@ class FlickrRequestClient: NSObject{
     
     let flickrClient = FlickrRESTClient.sharedInstance()
     
-    func fetchPhotosAtPin(completionHandler:((numberFetched: Int?, error: NSError?) -> Void)){
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStack.sharedInstance().managedObjectContext
+    }
+    
+    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: Int?, error: NSError?) -> Void)){
         
         print("Fetching photos at pin location")
-        var coordinate: CLLocationCoordinate2D {
-            let lat = 40.5865
-            let lon = 122.3917
-            
-            return CLLocationCoordinate2D(latitude: lat, longitude: lon)
-        }
         
-        fetchPhotosAtGeo(coordinate, fromPage: 1, total: 21){ (json, error) in
+        fetchPhotosAtGeo(pin.coordinate, fromPage: 1, total: 21){ (json, error) in
             if let error = error{
                 print("Error during fetch in fetchPhotosAtGeo: \(error)")
                 return
@@ -41,7 +40,7 @@ class FlickrRequestClient: NSObject{
         var jsonError: NSError? = nil
         var result: (photoURLs: [String], pages: Int)?
         do{
-            //result = try self.getImagesFromJSON(json!)
+            result = try self.getImagesFromJSON(json!)
             print(result)
         }catch let error as NSError {
             jsonError = error
@@ -55,18 +54,19 @@ class FlickrRequestClient: NSObject{
             return
             }
         
-//        let retrievedPhotos = result!.photoURLs.count
-//            for url in result!.photoURLs {
-//                let photoDic = [
-//                    
-//                    //TODO: Add downloaded photo data to Photo model
-//                ]
-//                
-//                //TODO: Append photos to pin instance in CoreData
-//            }
+        let retrievedPhotos = result!.photoURLs.count
+            for url in result!.photoURLs {
+                let photoDic = [
+                    ImgModel.Keys.URL: url
+                ]
+                
+                //Append photos to pin instance in CoreData
+                let photoAddedToModel = ImgModel(dictionary: photoDic, context: self.sharedContext)
+                photoAddedToModel.pin = pin
+                print(pin)
+            }
             
-            //completionHandler(numberFetched: retrievedPhotos, error: nil)
-
+            completionHandler(numberFetched: retrievedPhotos, error: nil)
         }
     }
     func fetchPhotosAtGeo(coordinate: CLLocationCoordinate2D, fromPage page: Int, total: Int, completionHandler:((jsonResponse: AnyObject!, error: NSError?) -> Void)) {
@@ -81,14 +81,6 @@ class FlickrRequestClient: NSObject{
             }
             completionHandler(jsonResponse: result, error: nil)
         }
-    }
-    
-    class func sharedInstance() -> FlickrRequestClient{
-        struct Static{
-            static let instance = FlickrRequestClient()
-        }
-        
-        return Static.instance
     }
     
     class func errorForJSONInterpreting(json: AnyObject!) -> NSError {
@@ -107,28 +99,37 @@ class FlickrRequestClient: NSObject{
         static let ClientError = "ClientError"
         static let ServerError = "ServerError"
     }
+    
+    class func sharedInstance() -> FlickrRequestClient{
+        struct Static{
+            static let instance = FlickrRequestClient()
+        }
+        
+        return Static.instance
+    }
 
 }
 
 extension FlickrRequestClient{
-//    func getImagesFromJSON(json: AnyObject!) throws -> (photoURLs:[String], pages: Int) {
-//        if let photoInfo = json[ResponseKeys.Photos] as? NSDictionary{
-//            if let pages = photoInfo[FlickrValues.Pages] as? Int{
-//                
-//                if let photoList = photoInfo[ResponseKeys.Photo] as? NSArray {
-//                    var result:[String] = [String]()
-//                    for item in photoList{
-//                        if let url = item[FlickrValues.URL_M] as? String {
-//                            
-//                            result.append(url)
-//                        }
-//                    }
-//                    
-//                    return (result, pages)
-//                }
-//            }
-//        }
-//        //TODO: Add json error checking
-//        throw FlickrRequestClient.errorForJSONInterpreting(json)
-//    }
+    func getImagesFromJSON(json: AnyObject!) throws -> (photoURLs:[String], pages: Int) {
+        print("Iniitializing getImagesFromJSON")
+        if let photoInfo = json[ResponseKeys.Photos] as? NSDictionary{
+            if let pages = photoInfo[FlickrValues.Pages] as? Int{
+                
+                if let photoList = photoInfo[ResponseKeys.Photo] as? NSArray {
+                    var result:[String] = [String]()
+                    for item in photoList{
+                        if let url = item[FlickrValues.URL_M] as? String {
+                            
+                            result.append(url)
+                        }
+                    }
+            
+                    return (result, pages)
+                }
+            }
+        }
+        //TODO: Add json error checking
+        throw FlickrRequestClient.errorForJSONInterpreting(json)
+    }
 }

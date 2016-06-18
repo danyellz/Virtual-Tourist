@@ -26,30 +26,12 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         annotationView.delegate = self
         fetchedResultsController.delegate = self
         
-//        startDownloadAtPin()
         fetchPinsFromModel()
     }
-    
-//    func startDownloadAtPin(){
-//        FlickrRequestClient.sharedInstance().fetchPhotosAtPin({(totalFetched, error) -> Void in
-//            print("Initial fetch complete!: \(totalFetched)")
-//        })
-//    }
     
     var sharedContext: NSManagedObjectContext{
         return CoreDataStack.sharedInstance().managedObjectContext
     }
-    
-    lazy var fetchedResultsController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key:"latitude", ascending: true)]
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                                  managedObjectContext: self.sharedContext,
-                                                                  sectionNameKeyPath: nil,
-                                                                  cacheName: nil)
-        return fetchedResultsController
-    }()
     
     func fetchPinsFromModel(){
         do{
@@ -57,6 +39,12 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         }catch{
         }
         annotationView.addAnnotations(self.fetchedResultsController.fetchedObjects as! [PinModel])
+    }
+    
+    func startDownloadAtPlacedPin(pin: PinModel){
+        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) -> Void in
+            print("Initial fetch complete!: \(totalFetched)")
+        })
     }
     
     func placePinRecognizer(gesture: UILongPressGestureRecognizer) {
@@ -69,12 +57,27 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
             let annotation = PinModel(annotationLat: coordinate.latitude, annotationLon: coordinate.longitude, context: sharedContext)
             print(annotation)
             
+            startDownloadAtPlacedPin(annotation)
+            
             annotationView.addAnnotation(annotation)
             CoreDataStack.sharedInstance().saveContext()
         default:
             return
         }
     }
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key:"latitude", ascending: true)]
+        
+        let fetchedResultsController =
+            NSFetchedResultsController(fetchRequest: fetchRequest,
+                                       managedObjectContext: self.sharedContext,
+                                       sectionNameKeyPath: nil,
+                                       cacheName: nil)
+        
+        return fetchedResultsController
+    }()
     
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         
@@ -87,6 +90,21 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         }
         
         return annotationView
+    }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        mapView.deselectAnnotation(view.annotation!, animated: true)
+        
+        //let annotation = view.annotation as! PinModel
+        performSegueWithIdentifier("transitionToPinDetail", sender: self)
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "transitionToPinDetail" {
+            
+            segue.destinationViewController as! PinDetailView
+            //let pin = sender as! PinModel
+        }
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

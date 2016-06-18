@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		102658291D14C66100BA6184 /* PinDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102658281D14C66100BA6184 /* PinDetailView.swift */; };
 		1064D9591D0FFDD6000B300F /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1064D9581D0FFDD6000B300F /* MapKit.framework */; };
 		10FF46181D0642A60034FA3F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46171D0642A60034FA3F /* AppDelegate.swift */; };
 		10FF461A1D0642A60034FA3F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46191D0642A60034FA3F /* ViewController.swift */; };
@@ -23,7 +24,7 @@
 		10FF46541D06964D0034FA3F /* FlickrRESTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46531D06964D0034FA3F /* FlickrRESTClient.swift */; };
 		10FF46581D06BE030034FA3F /* PinModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46571D06BE030034FA3F /* PinModel.swift */; };
 		10FF465C1D06C91D0034FA3F /* MainAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF465B1D06C91D0034FA3F /* MainAnnotationView.swift */; };
-		10FF46601D0FDE700034FA3F /* MovieModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF465F1D0FDE700034FA3F /* MovieModel.swift */; };
+		10FF46601D0FDE700034FA3F /* ImgModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF465F1D0FDE700034FA3F /* ImgModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		102658281D14C66100BA6184 /* PinDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinDetailView.swift; sourceTree = "<group>"; };
 		1064D9581D0FFDD6000B300F /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		10FF46141D0642A60034FA3F /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10FF46171D0642A60034FA3F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -66,7 +68,7 @@
 		10FF46531D06964D0034FA3F /* FlickrRESTClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrRESTClient.swift; sourceTree = "<group>"; };
 		10FF46571D06BE030034FA3F /* PinModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinModel.swift; sourceTree = "<group>"; };
 		10FF465B1D06C91D0034FA3F /* MainAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainAnnotationView.swift; sourceTree = "<group>"; };
-		10FF465F1D0FDE700034FA3F /* MovieModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieModel.swift; sourceTree = "<group>"; };
+		10FF465F1D0FDE700034FA3F /* ImgModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImgModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,7 +160,7 @@
 				10FF464F1D0686E30034FA3F /* FlickrRequestClient.swift */,
 				10FF46531D06964D0034FA3F /* FlickrRESTClient.swift */,
 				10FF46571D06BE030034FA3F /* PinModel.swift */,
-				10FF465F1D0FDE700034FA3F /* MovieModel.swift */,
+				10FF465F1D0FDE700034FA3F /* ImgModel.swift */,
 			);
 			name = DB;
 			path = VirtualTourist;
@@ -178,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				10FF465B1D06C91D0034FA3F /* MainAnnotationView.swift */,
+				102658281D14C66100BA6184 /* PinDetailView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -250,6 +253,7 @@
 				TargetAttributes = {
 					10FF46131D0642A60034FA3F = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = QEZ57R9UKD;
 						SystemCapabilities = {
 							com.apple.Maps.iOS = {
 								enabled = 1;
@@ -318,9 +322,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10FF46601D0FDE700034FA3F /* MovieModel.swift in Sources */,
+				10FF46601D0FDE700034FA3F /* ImgModel.swift in Sources */,
 				10FF464E1D06858A0034FA3F /* Constants.swift in Sources */,
 				10FF46471D0643C00034FA3F /* CoreDataStack.swift in Sources */,
+				102658291D14C66100BA6184 /* PinDetailView.swift in Sources */,
 				10FF46521D068B500034FA3F /* SearchParameters.swift in Sources */,
 				10FF461A1D0642A60034FA3F /* ViewController.swift in Sources */,
 				10FF465C1D06C91D0034FA3F /* MainAnnotationView.swift in Sources */,
@@ -470,10 +475,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = VirtualTourist/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.VirtualTourist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -481,10 +489,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = VirtualTourist/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.VirtualTourist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

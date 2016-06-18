@@ -30,6 +30,7 @@ class FlickrRESTClient: NSObject {
         guard error == nil else {
             let userInfo = [NSLocalizedDescriptionKey: "There was an error with the GET request: \(error)"]
             completionHandler(result: nil, error: NSError(domain: "taskForGetMethod", code: 1, userInfo: userInfo))
+            
             return
         }
         
@@ -49,6 +50,7 @@ class FlickrRESTClient: NSObject {
             
             guard let data = data else{
                 print("No Flickr data was retrieved during your request!")
+                
                 return
             }
             

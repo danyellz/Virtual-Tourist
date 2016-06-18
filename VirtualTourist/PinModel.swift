@@ -15,7 +15,7 @@ class PinModel: NSManagedObject, MKAnnotation {
     
     @NSManaged var latitude: NSNumber
     @NSManaged var longitude: NSNumber
-    //@NSManaged var ownedPhotos: [PhotoModel]
+    @NSManaged var photos: [ImgModel]
     
    
     

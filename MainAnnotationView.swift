@@ -11,7 +11,7 @@ import CoreData
 
 class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate{
     
-    var savedPin: PinModel? = nil
+    var savedPin: PinModel!
     var gestureRecognizer: UILongPressGestureRecognizer? = nil
     
     @IBOutlet weak var annotationView: MKMapView!
@@ -27,6 +27,18 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         fetchedResultsController.delegate = self
         
         fetchPinsFromModel()
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "transitionToPinDetail" {
+            let barButtomItem = UIBarButtonItem()
+            barButtomItem.title = "Done"
+            navigationItem.backBarButtonItem = barButtomItem
+            
+            let pinDetailVC = segue.destinationViewController as! PinDetailView
+            let pin = sender as! PinModel
+            pinDetailVC.selectedPin = pin
+        }
     }
     
     var sharedContext: NSManagedObjectContext{
@@ -58,8 +70,8 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
             print(annotation)
             
             startDownloadAtPlacedPin(annotation)
-            
             annotationView.addAnnotation(annotation)
+            
             CoreDataStack.sharedInstance().saveContext()
         default:
             return
@@ -80,7 +92,6 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
     }()
     
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        
         var annotationView = mapView.dequeueReusableAnnotationViewWithIdentifier("pin") as? MKPinAnnotationView
         
         if annotationView == nil{
@@ -95,16 +106,8 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation!, animated: true)
         
-        //let annotation = view.annotation as! PinModel
-        performSegueWithIdentifier("transitionToPinDetail", sender: self)
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "transitionToPinDetail" {
-            
-            segue.destinationViewController as! PinDetailView
-            //let pin = sender as! PinModel
-        }
+        let annotation = view.annotation as! PinModel
+        performSegueWithIdentifier("transitionToPinDetail", sender: annotation)
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

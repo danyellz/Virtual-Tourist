@@ -16,8 +16,7 @@ class ImgModel: NSManagedObject {
     struct Keys{
         static let URL = "url_m"
     }
-    
-    @NSManaged var url: String
+    @NSManaged var url: String?
     @NSManaged var pin: PinModel?
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -29,10 +28,20 @@ class ImgModel: NSManagedObject {
         let entity = NSEntityDescription.entityForName("Image", inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        url = dictionary[Keys.URL] as! String
+        url = dictionary[Keys.URL] as? String
         
+        print("Retrieved images for pin: \(url)")
+    }
+    
+    var image: UIImage? {
         
-        print("Retrieved images for pin!")
+        get {
+            return FlickrRequestClient.sharedInstance().retrieveImageForStorage(url!)
+        }
+        set{
+            print("Saving image data!")
+            FlickrRequestClient.sharedInstance().saveImage(newValue, withURL: url!)
+        }
     }
     
 }

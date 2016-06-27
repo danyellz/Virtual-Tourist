@@ -6,12 +6,14 @@
 //  Copyright © 2016 Ty Daniels. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreLocation
 import CoreFoundation
 import CoreData
 
 class FlickrRequestClient: NSObject {
+    
+    private var memoryCache = NSCache()
     
     var session: NSURLSession
     var pin: PinModel? = nil
@@ -25,6 +27,10 @@ class FlickrRequestClient: NSObject {
     
     var sharedContext: NSManagedObjectContext {
         return CoreDataStack.sharedInstance().managedObjectContext
+    }
+    
+    func saveContext() {
+        CoreDataStack.sharedInstance().saveContext()
     }
     
     func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: Int?, error: NSError?) -> Void)){
@@ -63,12 +69,16 @@ class FlickrRequestClient: NSObject {
                 //Append photos to pin instance in CoreData
                 let photoAddedToModel = ImgModel(dictionary: photoDic, context: self.sharedContext)
                 photoAddedToModel.pin = pin
-                print(pin)
+                self.getPinImageData(photoAddedToModel.pin!)
             }
             
+            self.saveContext()
             completionHandler(numberFetched: retrievedPhotos, error: nil)
         }
+        
     }
+    
+    
     func fetchPhotosAtGeo(coordinate: CLLocationCoordinate2D, fromPage page: Int, total: Int, completionHandler:((jsonResponse: AnyObject!, error: NSError?) -> Void)) {
         
         print("Fetching json at geo with parameters")
@@ -81,6 +91,70 @@ class FlickrRequestClient: NSObject {
             }
             completionHandler(jsonResponse: result, error: nil)
         }
+    }
+    
+    func getPinImageData(pin: PinModel){
+        for image in pin.images {
+            FlickrRESTClient.sharedInstance().getImageDataTask(image) {(data, errorString) in
+                guard let data = data else{
+                    print("Error with getPinImageData: \(errorString)")
+                    return
+                }
+                
+                let photo = UIImage(data: data as! NSData)
+                image.image = photo!
+                print(photo)
+                self.saveContext()
+            }
+        }
+    }
+    
+    
+    
+    func retrieveImageForStorage(url: String?) -> UIImage? {
+        print("Retrieving image data!")
+        if url == nil || url! == "" {
+            return nil
+        }
+        
+        let path = pathForIdentifier(url!)
+        print("Path: \(path)")
+        if let image = memoryCache.objectForKey(path) as? UIImage {
+            return image
+        }
+        
+        if let data = NSData(contentsOfFile: path){
+            print("Image data: \(data)")
+            return UIImage(data: data)
+        }
+        return nil
+    }
+    
+    func saveImage(image: UIImage?, withURL url: String) {
+        let path = pathForIdentifier(url)
+        print("Path\(path)")
+        
+        if image == nil {
+            memoryCache.removeObjectForKey(path)
+            
+            do{
+                try NSFileManager.defaultManager().removeItemAtPath(url)
+            }catch{}
+            
+            return
+        }
+        
+        memoryCache.setObject(image!, forKey: path)
+        let data = UIImagePNGRepresentation(image!)!
+        data.writeToFile(path, atomically: true)
+        
+        print("ImageFile:\(image)")
+    }
+    
+    func pathForIdentifier(identifier: String) -> String {
+        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        let fullURL = documentsDirectoryURL.URLByAppendingPathComponent(identifier)
+        return fullURL.path!
     }
     
     class func errorForJSONInterpreting(json: AnyObject!) -> NSError {

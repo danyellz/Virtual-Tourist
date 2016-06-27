@@ -17,22 +17,23 @@ class FlickrRESTClient: NSObject {
         super.init()
     }
     
-    func taskForGetMethod(var method: String, parameters: [String : AnyObject], completionHandler:(result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
+    func taskForGetMethod(var method: String, parameters: [String : AnyObject]?, completionHandler:(result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
         method += FlickrRESTClient.escapedParameters(parameters)
-        let url = NSURL(string: method)
+        let url = NSURL(string: method)!
         print(url)
-        let request = NSMutableURLRequest(URL: url!)
+        
+        let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "GET"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let task = session.dataTaskWithRequest(request) {(data, response, error) in
-        
+            
         guard error == nil else {
             let userInfo = [NSLocalizedDescriptionKey: "There was an error with the GET request: \(error)"]
             completionHandler(result: nil, error: NSError(domain: "taskForGetMethod", code: 1, userInfo: userInfo))
             
             return
-        }
+            }
         
         guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
             if let response = response as? NSHTTPURLResponse {
@@ -57,6 +58,7 @@ class FlickrRESTClient: NSObject {
             FlickrRESTClient.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandler)
         }
         task.resume()
+        
         return task
     }
     
@@ -78,6 +80,18 @@ class FlickrRESTClient: NSObject {
         print(parsedResult)
     }
     
+    func getImageDataTask(image: ImgModel, completionHandler: (data: AnyObject?, errorString: String?) -> Void) {
+        taskForGetMethod(image.url!, parameters: nil) { (result, error) in
+            
+            if error != nil{
+                completionHandler(data: nil, errorString: "Error downloading \(image.url)")
+            }else{
+                completionHandler(data: result, errorString: nil)
+            }
+        }
+    }
+    
+    
     /* Helper function: Given a dictionary of parameters, convert to a string for a url */
     class func escapedParameters(parameters: [String : AnyObject]?) -> String {
         
@@ -86,15 +100,11 @@ class FlickrRESTClient: NSObject {
         }
         
         var urlVars = [String]()
-        
         for (key, value) in parameters {
-            
-            /* Make sure that it is a string value */
+            /* Check if key is a string value */
             let stringValue = "\(value)"
-            
             /* Escape it */
             let escapedValue = stringValue.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-            
             /* Append it */
             urlVars += [key + "=" + "\(escapedValue!)"]
             

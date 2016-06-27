@@ -15,10 +15,8 @@ class PinModel: NSManagedObject, MKAnnotation {
     
     @NSManaged var latitude: NSNumber
     @NSManaged var longitude: NSNumber
-    @NSManaged var photos: [ImgModel]
-    
-   
-    
+    @NSManaged var images: [ImgModel]
+
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }

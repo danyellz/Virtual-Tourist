@@ -28,6 +28,38 @@ class CoreDataStack{
         return docsDir[docsDir.count-1]
     }()
     
+    lazy var imgDocsDirectory: NSURL = {
+        
+        let imgsDirectory = CoreDataStack.sharedInstance().appDocsDir.URLByAppendingPathComponent("storeImages")
+        let imgPath = imgsDirectory.path!
+        
+        var isDirectory: ObjCBool = ObjCBool(false)
+        if NSFileManager.defaultManager().fileExistsAtPath(imgPath, isDirectory: &isDirectory){
+            if !isDirectory{
+                print("This directory has already been persisted!")
+                abort()
+            }
+        }else {
+            
+            var error: NSError? = nil
+            do{
+                try NSFileManager.defaultManager().createDirectoryAtPath(imgPath, withIntermediateDirectories: false, attributes: nil)
+                print("Image directory: \(imgsDirectory)")
+            }catch var pathError as NSError{
+                error = pathError
+                if let error = error {
+                    print("Error creating imgPath: \(error)")
+                    abort()
+                }
+            }catch{
+                
+                fatalError()
+            }
+        }
+        
+        return imgsDirectory
+    }()
+    
     lazy var managedObjectModel: NSManagedObjectModel = {
         let object = NSBundle.mainBundle().URLForResource("Model", withExtension: "momd")!
         return NSManagedObjectModel(contentsOfURL: object)!

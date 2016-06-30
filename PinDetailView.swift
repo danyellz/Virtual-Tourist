@@ -97,14 +97,19 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("DetailCell", forIndexPath: indexPath) as! ImageCollectionCell
         let image = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
         
-        configureUI(cell, image: image)
+        configureUI(cell, image: image, atIndexPath: indexPath)
         
         return cell
     }
     
-    func configureUI(cell: ImageCollectionCell, image: ImgModel) {
+    func configureUI(cell: ImageCollectionCell, image: ImgModel, atIndexPath indexPath: NSIndexPath) {
         
         if image.image != nil{
+            image.loadUpdateHandler = {[unowned self] () -> Void in
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                })
+            }
             cell.flickrImageView.image = image.image!
             print("Image.image \(image.image!)")
         }else{

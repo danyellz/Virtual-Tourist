@@ -44,7 +44,7 @@ class FlickrRequestClient: NSObject {
             }
         
         var jsonError: NSError? = nil
-        var result: (photoURLs: [String], pages: Int)?
+            var result: (photoURLs: [String], pages: Int)?
         do{
             result = try self.getImagesFromJSON(json!)
             print(result)
@@ -69,8 +69,9 @@ class FlickrRequestClient: NSObject {
                 //Append photos to pin instance in CoreData
                 let photoAddedToModel = ImgModel(dictionary: photoDic, context: self.sharedContext)
                 photoAddedToModel.pin = pin
-                self.getPinImageData(photoAddedToModel.pin!)
             }
+            
+            self.getPinImageData(pin)
             
             self.saveContext()
             completionHandler(numberFetched: retrievedPhotos, error: nil)
@@ -101,7 +102,7 @@ class FlickrRequestClient: NSObject {
                     return
                 }
                 
-                let photo = UIImage(data: data as! NSData)
+                let photo = UIImage(data: data)
                 image.image = photo!
                 print(photo)
                 self.saveContext()
@@ -109,20 +110,16 @@ class FlickrRequestClient: NSObject {
         }
     }
     
-    
-    
     func retrieveImageForStorage(url: String?) -> UIImage? {
         print("Retrieving image data!")
         if url == nil || url! == "" {
             return nil
         }
-        
         let path = pathForIdentifier(url!)
         print("Path: \(path)")
         if let image = memoryCache.objectForKey(path) as? UIImage {
             return image
         }
-        
         if let data = NSData(contentsOfFile: path){
             print("Image data: \(data)")
             return UIImage(data: data)
@@ -194,9 +191,9 @@ extension FlickrRequestClient{
                     var result:[String] = [String]()
                     for item in photoList{
                         if let url = item[FlickrValues.URL_M] as? String {
-                            
                             result.append(url)
                         }
+
                     }
             
                     return (result, pages)

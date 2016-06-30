@@ -34,7 +34,6 @@ class FlickrRESTClient: NSObject {
             
             return
             }
-        
         guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
             if let response = response as? NSHTTPURLResponse {
                 let userInfo = [NSLocalizedDescriptionKey: "Your request returned an invalid response w/ code: \(response.statusCode)"]
@@ -80,18 +79,36 @@ class FlickrRESTClient: NSObject {
         print(parsedResult)
     }
     
-    func getImageDataTask(image: ImgModel, completionHandler: (data: AnyObject?, errorString: String?) -> Void) {
-        taskForGetMethod(image.url!, parameters: nil) { (result, error) in
-            
+    func getImageDataTask(image: ImgModel, completionHandler: (data: NSData?,
+        errorString: String?) -> Void) {
+        
+        if let imageURL = NSURL(string: image.url!){
+        print("URL: \(imageURL)")
+            taskForImageData(imageURL) {data, error in
             if error != nil{
-                completionHandler(data: nil, errorString: "Error downloading \(image.url)")
+                completionHandler(data: nil, errorString: "Error downloading \(error)")
             }else{
-                completionHandler(data: result, errorString: nil)
+                print("Result: \(data)")
+                completionHandler(data: data, errorString: nil)
             }
         }
     }
+    }
     
-    
+    func taskForImageData(url: NSURL, completionHandler: (imageData: NSData?, error: NSError?) -> Void) -> NSURLSessionTask{
+        let request = NSURLRequest(URL: url)
+        
+        let task = session.dataTaskWithRequest(request) {data, response, downloadError in
+            if let error = downloadError{
+                completionHandler(imageData: nil, error: error)
+            }else{
+                completionHandler(imageData: data, error: nil)
+            }
+        }
+        task.resume()
+        return task
+    }
+
     /* Helper function: Given a dictionary of parameters, convert to a string for a url */
     class func escapedParameters(parameters: [String : AnyObject]?) -> String {
         

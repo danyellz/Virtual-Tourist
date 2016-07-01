@@ -15,9 +15,9 @@ class ImgModel: NSManagedObject {
     
     struct Keys{
         static let URL = "url_m"
-        static let ID = "id"
     }
     @NSManaged var url: String?
+    @NSManaged var id : String?
     @NSManaged var pin: PinModel?
     
     var loadUpdateHandler: (() -> Void)?
@@ -38,11 +38,11 @@ class ImgModel: NSManagedObject {
     var image: UIImage? {
         
         get {
-            return FlickrRequestClient.sharedInstance().retrieveImageForStorage(url)
+            return FlickrRequestClient.sharedInstance().retrieveImageForStorage(id)
         }
         set{
             print("Saving image data!")
-            FlickrRequestClient.sharedInstance().saveImage(newValue, withURL: url!)
+            FlickrRequestClient.sharedInstance().saveImage(newValue, withURL: id!)
             loadUpdateHandler?()
         }
     }

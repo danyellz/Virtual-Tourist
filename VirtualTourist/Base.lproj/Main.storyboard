@@ -73,7 +73,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ucf-AT-oSK">
-                                                    <rect key="frame" x="8" y="8" width="84" height="84"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                     <color key="backgroundColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
                                                 </imageView>
                                             </subviews>
@@ -81,10 +81,10 @@
                                         </view>
                                         <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
                                         <constraints>
-                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="top" secondItem="cgJ-kJ-1Po" secondAttribute="topMargin" id="6bF-Ak-llT"/>
-                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="bottom" secondItem="cgJ-kJ-1Po" secondAttribute="bottomMargin" id="GrJ-3K-BjQ"/>
-                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="trailing" secondItem="cgJ-kJ-1Po" secondAttribute="trailingMargin" id="Mbm-oK-nIL"/>
-                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="leading" secondItem="cgJ-kJ-1Po" secondAttribute="leadingMargin" id="kQc-UE-4Er"/>
+                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="top" secondItem="cgJ-kJ-1Po" secondAttribute="topMargin" constant="-8" id="6bF-Ak-llT"/>
+                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="bottom" secondItem="cgJ-kJ-1Po" secondAttribute="bottomMargin" constant="8" id="GrJ-3K-BjQ"/>
+                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="trailing" secondItem="cgJ-kJ-1Po" secondAttribute="trailingMargin" constant="8" id="Mbm-oK-nIL"/>
+                                            <constraint firstItem="ucf-AT-oSK" firstAttribute="leading" secondItem="cgJ-kJ-1Po" secondAttribute="leadingMargin" constant="-8" id="kQc-UE-4Er"/>
                                         </constraints>
                                         <size key="customSize" width="100" height="100"/>
                                         <connections>

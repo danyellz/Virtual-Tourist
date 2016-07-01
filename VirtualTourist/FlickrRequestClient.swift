@@ -69,6 +69,8 @@ class FlickrRequestClient: NSObject {
                 //Append photos to pin instance in CoreData
                 let photoAddedToModel = ImgModel(dictionary: photoDic, context: self.sharedContext)
                 photoAddedToModel.pin = pin
+                let randomInt = NSInteger(arc4random_uniform(100000) + 1)
+                photoAddedToModel.id = String(randomInt)
             }
             
             self.getPinImageData(pin)
@@ -104,7 +106,6 @@ class FlickrRequestClient: NSObject {
                 
                 let photo = UIImage(data: data)
                 image.image = photo!
-                print(photo)
                 self.saveContext()
             }
         }
@@ -121,7 +122,6 @@ class FlickrRequestClient: NSObject {
             return image
         }
         if let data = NSData(contentsOfFile: path){
-            print("Image data: \(data)")
             return UIImage(data: data)
         }
         return nil
@@ -193,7 +193,6 @@ extension FlickrRequestClient{
                         if let url = item[FlickrValues.URL_M] as? String {
                             result.append(url)
                         }
-
                     }
             
                     return (result, pages)

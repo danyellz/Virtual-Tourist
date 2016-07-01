@@ -57,10 +57,14 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         return CoreDataStack.sharedInstance().managedObjectContext
     }
     
+    func saveContext(){
+        return CoreDataStack.sharedInstance().saveContext()
+    }
+    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         
         let fetchRequest = NSFetchRequest(entityName: "Image")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "url", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.selectedPin)
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
@@ -105,15 +109,17 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     func configureUI(cell: ImageCollectionCell, image: ImgModel, atIndexPath indexPath: NSIndexPath) {
         
         if image.image != nil{
-            image.loadUpdateHandler = {[unowned self] () -> Void in
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
-                })
-            }
+            image.loadUpdateHandler = nil
             cell.flickrImageView.image = image.image!
             print("Image.image \(image.image!)")
+            self.saveContext()
         }else{
-            print("Preexisting images in configureCell!")
+            image.loadUpdateHandler = {[unowned self] () -> Void in
+            dispatch_async(dispatch_get_main_queue(), {
+            self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                })
+            }
+            cell.flickrImageView.image = image.image
         }
     }
     
@@ -132,13 +138,20 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         switch type {
         case .Insert:
-                runNSBlockOperation.append(
+            if collectionView.numberOfSections() > 0 {
+                if collectionView.numberOfItemsInSection((indexPath?.section)!) == 0 {
+                    collectionView.reloadData()
+                    runNSBlockOperation.append(
                     NSBlockOperation(block: {[weak self] in
                         if let this = self {
                             this.collectionView!.insertItemsAtIndexPaths([newIndexPath!])
                         }
                         })
-            )
+                    )
+                }
+            }else{
+                collectionView.reloadData()
+            }
         case .Update:
                 runNSBlockOperation.append(
                     NSBlockOperation(block: {[weak self] in

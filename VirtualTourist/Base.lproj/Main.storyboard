@@ -33,9 +33,17 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="lcg-uI-IWq" secondAttribute="bottom" id="osv-cI-cMx"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="UY8-dN-M0A"/>
+                    <navigationItem key="navigationItem" id="UY8-dN-M0A">
+                        <barButtonItem key="leftBarButtonItem" title="Edit" id="03y-IK-h82">
+                            <color key="tintColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="beginEditingAnnotations:" destination="BYZ-38-t0r" id="qy2-uj-poK"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="annotationView" destination="lcg-uI-IWq" id="3tZ-Rc-bb5"/>
+                        <outlet property="pinActionBtn" destination="03y-IK-h82" id="a1h-aU-A9w"/>
                         <segue destination="og5-1Y-8cd" kind="show" identifier="transitionToPinDetail" id="ycG-ty-tfi"/>
                     </connections>
                 </viewController>
@@ -56,10 +64,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="45D-Aw-cSU">
-                                <rect key="frame" x="0.0" y="236" width="600" height="364"/>
+                                <rect key="frame" x="0.0" y="236" width="600" height="317"/>
                                 <color key="backgroundColor" red="0.80000001190000003" green="0.80000001190000003" blue="0.80000001190000003" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UoN-U7-8eh">
-                                    <size key="itemSize" width="50" height="50"/>
+                                    <size key="itemSize" width="100" height="100"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
@@ -86,7 +94,6 @@
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="trailing" secondItem="cgJ-kJ-1Po" secondAttribute="trailingMargin" constant="8" id="Mbm-oK-nIL"/>
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="leading" secondItem="cgJ-kJ-1Po" secondAttribute="leadingMargin" constant="-8" id="kQc-UE-4Er"/>
                                         </constraints>
-                                        <size key="customSize" width="100" height="100"/>
                                         <connections>
                                             <outlet property="flickrImageView" destination="ucf-AT-oSK" id="ipM-nU-WjW"/>
                                         </connections>
@@ -106,15 +113,26 @@
                                     <outlet property="delegate" destination="og5-1Y-8cd" id="NPX-S6-0wz"/>
                                 </connections>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ieX-jG-iFA">
+                                <rect key="frame" x="0.0" y="553" width="600" height="47"/>
+                                <state key="normal" title="Load More"/>
+                                <connections>
+                                    <action selector="newCollectionBtn:" destination="og5-1Y-8cd" eventType="touchUpInside" id="bwS-1p-ntm"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="45D-Aw-cSU" firstAttribute="bottom" secondItem="aAI-lh-sk4" secondAttribute="top" id="BkG-5U-svm"/>
+                            <constraint firstItem="45D-Aw-cSU" firstAttribute="bottom" secondItem="aAI-lh-sk4" secondAttribute="top" constant="-47" id="BkG-5U-svm"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ieX-jG-iFA" secondAttribute="trailing" constant="-20" id="HsJ-vh-STh"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="leading" secondItem="dKY-HI-SZc" secondAttribute="leading" id="K6g-XC-ZOh"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="trailing" secondItem="45D-Aw-cSU" secondAttribute="trailing" id="NcO-aL-F8C"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="leading" secondItem="45D-Aw-cSU" secondAttribute="leading" id="ZGM-Jr-bqd"/>
+                            <constraint firstItem="ieX-jG-iFA" firstAttribute="top" secondItem="45D-Aw-cSU" secondAttribute="bottom" id="bPY-b3-ehX"/>
                             <constraint firstItem="45D-Aw-cSU" firstAttribute="top" secondItem="QsL-Ae-iWE" secondAttribute="bottom" id="eD6-vn-Qt2"/>
+                            <constraint firstItem="ieX-jG-iFA" firstAttribute="leading" secondItem="dKY-HI-SZc" secondAttribute="leadingMargin" constant="-20" id="hHw-e0-qmZ"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="top" secondItem="dKY-HI-SZc" secondAttribute="top" id="qpQ-jj-GbA"/>
+                            <constraint firstItem="aAI-lh-sk4" firstAttribute="top" secondItem="ieX-jG-iFA" secondAttribute="bottom" id="yjt-fJ-0JH"/>
                             <constraint firstAttribute="trailing" secondItem="QsL-Ae-iWE" secondAttribute="trailing" id="zhE-9A-124"/>
                         </constraints>
                     </view>
@@ -125,7 +143,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xcx-68-xjQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2095" y="316"/>
+            <point key="canvasLocation" x="1969" y="227"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="D7j-RS-qsg">

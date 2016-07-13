@@ -12,15 +12,16 @@ import CoreData
 class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate{
     
     var savedPin: PinModel!
+    var savedPins = [PinModel]()
     var gestureRecognizer: UILongPressGestureRecognizer? = nil
+    var editingPins: Bool = false
     
     @IBOutlet weak var annotationView: MKMapView!
+    @IBOutlet weak var pinActionBtn: UIBarButtonItem!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        let annotationView = MKAnnotationView()
-//        let pin = annotationView.annotation as! PinModel
         gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(placePinRecognizer))
         annotationView.addGestureRecognizer(gestureRecognizer!)
         annotationView.delegate = self
@@ -103,11 +104,31 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         return annotationView
     }
     
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        mapView.deselectAnnotation(view.annotation!, animated: true)
+    @IBAction func beginEditingAnnotations(sender: AnyObject) {
+        self.editingPins = true
+        pinActionBtn.title = "Done"
         
+    }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        if editingPins == false {
+        mapView.deselectAnnotation(view.annotation!, animated: true)
+            
         let annotation = view.annotation as! PinModel
         performSegueWithIdentifier("transitionToPinDetail", sender: annotation)
+            
+        } else {
+            for pin in savedPins {
+                print("Deleting pin \(pin)")
+                let coord = view.annotation?.coordinate
+                if pin.latitude == (coord!.latitude) && pin.longitude == (coord!.longitude){
+                    sharedContext.deleteObject(pin)
+                    CoreDataStack.sharedInstance().saveContext()
+                    self.annotationView.removeAnnotation(view.annotation!)
+                    break
+                }
+            }
+        }
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

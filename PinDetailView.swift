@@ -19,7 +19,13 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     @IBOutlet weak var collectionView: UICollectionView!
     
     var selectedPin: PinModel!
-    var runNSBlockOperation: [NSBlockOperation] = []
+    var imgModel: ImgModel!
+    var shouldReloadCollectionView: Bool?
+    
+    var insertedIndex: [NSIndexPath]!
+    var updatedIndex: [NSIndexPath]!
+    var deletedIndex: [NSIndexPath]!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,6 +59,20 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         }catch{}
     }
     
+    @IBAction func newCollectionBtn(sender: AnyObject) {
+        getNewCollection()
+    }
+    
+    func getNewCollection(){
+        if let newFetch = self.fetchedResultsController.fetchedObjects{
+            for object in newFetch{
+                let newImg = object as! ImgModel
+                self.sharedContext.deleteObject(newImg)
+            }
+        }
+        FlickrRequestClient.sharedInstance().getNewGeoImgs(selectedPin)
+    }
+    
     var sharedContext: NSManagedObjectContext {
         return CoreDataStack.sharedInstance().managedObjectContext
     }
@@ -74,15 +94,12 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     }()
     
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier("pin") as? MKPinAnnotationView
-        
         if pinView == nil{
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "pin")
         }else{
             pinView?.annotation = annotation
         }
-        
         return pinView
     }
     
@@ -102,7 +119,6 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         let image = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
         
         configureUI(cell, image: image, atIndexPath: indexPath)
-        
         return cell
     }
     
@@ -113,109 +129,78 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
             cell.flickrImageView.image = image.image!
             print("Image.image \(image.image!)")
             self.saveContext()
+            //addSpinner(cell, activityBool: true)
         }else{
             image.loadUpdateHandler = {[unowned self] () -> Void in
             dispatch_async(dispatch_get_main_queue(), {
-            self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            self.collectionView.reloadData()
                 })
             }
             cell.flickrImageView.image = image.image
+            //addSpinner(cell, activityBool: false)
         }
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath){
-        if let cell = collectionView.cellForItemAtIndexPath(indexPath) {
+        if collectionView.cellForItemAtIndexPath(indexPath) != nil {
             let image = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
             print(image)
         }
     }
 
-    
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        runNSBlockOperation.removeAll(keepCapacity: false)
+        
+        insertedIndex = [NSIndexPath]()
+        updatedIndex = [NSIndexPath]()
+        deletedIndex = [NSIndexPath]()
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         switch type {
         case .Insert:
-            if collectionView.numberOfSections() > 0 {
-                if collectionView.numberOfItemsInSection((indexPath?.section)!) == 0 {
-                    collectionView.reloadData()
-                    runNSBlockOperation.append(
-                    NSBlockOperation(block: {[weak self] in
-                        if let this = self {
-                            this.collectionView!.insertItemsAtIndexPaths([newIndexPath!])
-                        }
-                        })
-                    )
-                }
-            }else{
-                collectionView.reloadData()
-            }
+            insertedIndex.append(newIndexPath!)
         case .Update:
-                runNSBlockOperation.append(
-                    NSBlockOperation(block: {[weak self] in
-                        if let this = self {
-                            this.collectionView!.reloadItemsAtIndexPaths([indexPath!])
-                        }
-                        })
-            )
+            updatedIndex.append(indexPath!)
         case .Move:
-            runNSBlockOperation.append(
-                NSBlockOperation(block: {[weak self] in
-                    if let this = self{
-                        this.collectionView!.moveItemAtIndexPath(indexPath!, toIndexPath: newIndexPath!)
-                    }
-                    })
-            )
+            print("Surprise!")
         case .Delete:
-            runNSBlockOperation.append(
-                NSBlockOperation(block: {[weak self] in
-                    if let this = self{
-                        this.collectionView!.deleteItemsAtIndexPaths([indexPath!])
-                    }
-                    })
-            )
-        }
-    }
-    
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
-        switch type{
-        case .Insert:
-            runNSBlockOperation.append(
-                NSBlockOperation(block: {[weak self] in
-                if let this = self{
-                    this.collectionView!.insertSections(NSIndexSet(index: sectionIndex))
-                    }
-                    })
-            )
-        case .Delete:
-            runNSBlockOperation.append(
-                NSBlockOperation(block: {[weak self] in
-                    if let this = self{
-                        this.collectionView!.deleteSections(NSIndexSet(index: sectionIndex))
-                    }
-                    })
-            )
-        default:
-            runNSBlockOperation.append(
-                NSBlockOperation(block: {[weak self] in
-                    if let this = self{
-                        this.collectionView!.reloadSections(NSIndexSet(index: sectionIndex))
-                    }
-                    })
-            )
+            deletedIndex.append(indexPath!)
         }
     }
 
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        collectionView!.performBatchUpdates({ () -> Void in
-            for operation: NSBlockOperation in self.runNSBlockOperation{
-                operation.start()
+        collectionView.performBatchUpdates({() -> Void in
+            for indexPath in self.insertedIndex {
+                self.collectionView.insertItemsAtIndexPaths([indexPath])
             }
-            }, completion: {(finished) -> Void in
-                self.runNSBlockOperation.removeAll(keepCapacity: false)
-        })
+            for indexPath in self.updatedIndex {
+                self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+            for indexPath in self.deletedIndex {
+                self.collectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            },completion: nil)
+        
+    }
+    
+    func addSpinner(cellView: UICollectionViewCell, activityBool: Bool){
+        
+        let activitySpinner = UIActivityIndicatorView.init(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
+        activitySpinner.center = cellView.center
+        activitySpinner.color = UIColor.whiteColor()
+        activitySpinner.startAnimating()
+        
+        if activityBool == true{
+            activitySpinner.startAnimating()
+            cellView.addSubview(activitySpinner)
+        }else if activityBool == false{
+            activitySpinner.stopAnimating()
+            cellView.willRemoveSubview(activitySpinner)
+        }
+    }
+    
+    func removeSpinner(){
+        
     }
     
 }

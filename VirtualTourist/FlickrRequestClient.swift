@@ -84,8 +84,10 @@ class FlickrRequestClient: NSObject {
     
     func fetchPhotosAtGeo(coordinate: CLLocationCoordinate2D, fromPage page: Int, total: Int, completionHandler:((jsonResponse: AnyObject!, error: NSError?) -> Void)) {
         
+        let randomInt = Int(arc4random_uniform(100) + 1)
+        
         print("Fetching json at geo with parameters")
-        let parameters = paginateImageLocationSearch(coordinate, page: page, perPage: total)
+        let parameters = paginateImageLocationSearch(coordinate, page: randomInt, perPage: total)
         
         flickrClient.taskForGetMethod(FlickrRequestClient.BaseRefs.BaseURL, parameters: parameters) {(result, error) -> Void in
             if let error = error{
@@ -109,6 +111,20 @@ class FlickrRequestClient: NSObject {
                 self.saveContext()
             }
         }
+    }
+    
+    func getNewGeoImgs(pin: PinModel){
+        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) -> Void in
+            print("Initial fetch complete!: \(totalFetched)")
+            
+            if let error = error{
+                print(error)
+            }else {
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.saveContext()
+                })
+            }
+        })
     }
     
     func retrieveImageForStorage(url: String?) -> UIImage? {

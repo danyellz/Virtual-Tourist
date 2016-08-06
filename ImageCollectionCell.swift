@@ -12,4 +12,6 @@ class ImageCollectionCell: UICollectionViewCell {
     
     @IBOutlet weak var flickrImageView: UIImageView!
     
+    @IBOutlet weak var indicatorView: UIActivityIndicatorView!
+    
 }

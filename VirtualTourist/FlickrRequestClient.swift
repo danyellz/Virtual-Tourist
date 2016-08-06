@@ -36,13 +36,14 @@ class FlickrRequestClient: NSObject {
         CoreDataStack.sharedInstance().saveContext()
     }
     
-    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: AnyObject! , error: NSError?) -> Void)) -> Void{
+    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: AnyObject! , error: NSError?) -> Void)) {
         
         print("Fetching photos at pin location")
         
         fetchPhotosAtGeo(pin.coordinate, fromPage: 1, total: 21){ (json, error) in
             if let error = error{
                 print("Error during fetch in fetchPhotosAtGeo: \(error)")
+                completionHandler(numberFetched: nil, error: error)
                 return
             }
         
@@ -94,7 +95,9 @@ class FlickrRequestClient: NSObject {
         let parameters = paginateImageLocationSearch(coordinate, page: randomInt, perPage: total)
         
         flickrClient.taskForGetMethod(FlickrRequestClient.BaseRefs.BaseURL, parameters: parameters) {(result, error) -> Void in
+            
             if let error = error{
+                print("taskForGetError in fetchPhotosAtGeo")
                 completionHandler(jsonResponse: nil, error: error)
                 return
             }

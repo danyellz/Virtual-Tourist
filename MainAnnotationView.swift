@@ -28,8 +28,11 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
         annotationView.delegate = self
         fetchedResultsController.delegate = self
         fetchPinsFromModel()
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: #selector(beginEdit))
         
-        print(savedPins)
+        if savedPins.count == 0 {
+            showAlert("Get Images", alertMessage: "Add a pin by long-pressing on the map to save images.", actionTitle: "Ok")
+        }
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -59,9 +62,16 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
     }
     
     func startDownloadAtPlacedPin(pin: PinModel){
-        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) -> Void in
-            print("Initial fetch complete!: \(totalFetched)")
-        })
+        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin) {(numberFetched, error) -> Void in
+            
+            if error != nil{
+                print("ERROR ERROR")
+                self.showAlert("Error", alertMessage: "It looks there was a network error. Try reconnecting.", actionTitle: "Ok")
+                return
+            }
+            
+            print("Initial fetch complete!: \(numberFetched)")
+        }
     }
     
     func placePinRecognizer(gesture: UILongPressGestureRecognizer) {
@@ -122,9 +132,8 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
     
     
     @IBAction func beginEditingAnnotations(sender: AnyObject) {
-        self.editingPins = true
-        pinActionBtn.title = "Done"
-        
+
+
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
@@ -181,11 +190,48 @@ class MainAnnotationView: UIViewController, MKMapViewDelegate, NSFetchedResultsC
             fetchPinsFromModel()
         case .Delete:
             annotationView.removeAnnotation(object as! PinModel)
+            fetchPinsFromModel()
         case .Update:
             annotationView.removeAnnotation(object as! PinModel)
             annotationView.addAnnotation(object as! PinModel)
         default:
             break
         }
+    }
+    
+    func beginEdit() {
+        
+        if savedPins.count != 0 {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Stop, target: self, action: #selector(stopEdit))
+            annotationView.layer.borderWidth = 10;
+            annotationView.layer.borderColor = UIColor.redColor().CGColor
+            self.editingPins = true
+            gestureRecognizer?.enabled = false
+        } else {
+            showAlert("Woops", alertMessage: "It looks like there isn't anything to delete.", actionTitle: "Add Pins")
+        }
+        
+    }
+    
+    func stopEdit() {
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: #selector(beginEdit))
+        annotationView.layer.borderWidth = 0;
+        self.editingPins = false
+        gestureRecognizer?.enabled = true
+    }
+    
+    //Function to show alert message for error checking
+    func showAlert(alertTitle: String, alertMessage: String, actionTitle: String){
+        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
+        alert.addAction(UIAlertAction(title: actionTitle, style: .Default, handler: nil))
+        
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    class func sharedInstance() -> MainAnnotationView{
+        struct Static{
+            static let instance = MainAnnotationView()
+        }
+        return Static.instance
     }
 }

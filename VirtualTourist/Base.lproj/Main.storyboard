@@ -35,17 +35,9 @@
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="lcg-uI-IWq" secondAttribute="bottom" id="osv-cI-cMx"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="UY8-dN-M0A">
-                        <barButtonItem key="leftBarButtonItem" title="Edit" id="03y-IK-h82">
-                            <color key="tintColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
-                            <connections>
-                                <action selector="beginEditingAnnotations:" destination="BYZ-38-t0r" id="qy2-uj-poK"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="UY8-dN-M0A"/>
                     <connections>
                         <outlet property="annotationView" destination="lcg-uI-IWq" id="3tZ-Rc-bb5"/>
-                        <outlet property="pinActionBtn" destination="03y-IK-h82" id="a1h-aU-A9w"/>
                         <segue destination="og5-1Y-8cd" kind="show" identifier="transitionToPinDetail" id="ycG-ty-tfi"/>
                     </connections>
                 </viewController>
@@ -56,7 +48,7 @@
         <!--Pin Detail View-->
         <scene sceneID="Ckx-uV-rBy">
             <objects>
-                <viewController id="og5-1Y-8cd" customClass="PinDetailView" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController automaticallyAdjustsScrollViewInsets="NO" id="og5-1Y-8cd" customClass="PinDetailView" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="LUe-iw-9sd"/>
                         <viewControllerLayoutGuide type="bottom" id="aAI-lh-sk4"/>
@@ -68,36 +60,43 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="45D-Aw-cSU">
                                 <rect key="frame" x="0.0" y="236" width="600" height="317"/>
                                 <color key="backgroundColor" red="0.80000001190000003" green="0.80000001190000003" blue="0.80000001190000003" alpha="1" colorSpace="calibratedRGB"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UoN-U7-8eh">
-                                    <size key="itemSize" width="100" height="100"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="kPd-PO-gua">
+                                    <size key="itemSize" width="50" height="50"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="DetailCell" id="cgJ-kJ-1Po" customClass="ImageCollectionCell" customModule="VirtualTourist" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="64" width="100" height="100"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ucf-AT-oSK">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ucf-AT-oSK">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
-                                                    <color key="backgroundColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="GXf-0c-m2e">
+                                                    <rect key="frame" x="32" y="31" width="37" height="37"/>
+                                                    <color key="color" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
                                         <constraints>
+                                            <constraint firstItem="GXf-0c-m2e" firstAttribute="centerY" secondItem="ucf-AT-oSK" secondAttribute="centerY" id="0iU-lc-8vN"/>
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="top" secondItem="cgJ-kJ-1Po" secondAttribute="topMargin" constant="-8" id="6bF-Ak-llT"/>
+                                            <constraint firstItem="GXf-0c-m2e" firstAttribute="centerX" secondItem="ucf-AT-oSK" secondAttribute="centerX" id="BrE-Rh-Ms2"/>
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="bottom" secondItem="cgJ-kJ-1Po" secondAttribute="bottomMargin" constant="8" id="GrJ-3K-BjQ"/>
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="trailing" secondItem="cgJ-kJ-1Po" secondAttribute="trailingMargin" constant="8" id="Mbm-oK-nIL"/>
                                             <constraint firstItem="ucf-AT-oSK" firstAttribute="leading" secondItem="cgJ-kJ-1Po" secondAttribute="leadingMargin" constant="-8" id="kQc-UE-4Er"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="flickrImageView" destination="ucf-AT-oSK" id="ipM-nU-WjW"/>
+                                            <outlet property="indicatorView" destination="GXf-0c-m2e" id="79V-qi-WyD"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>

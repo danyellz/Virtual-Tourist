@@ -59,7 +59,6 @@ class FlickrRESTClient: NSObject {
             }
         }
         task.resume()
-        
         return task
     }
     

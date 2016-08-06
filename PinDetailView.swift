@@ -21,7 +21,6 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     @IBOutlet weak var loadBtn: UIButton!
     
     var selectedPin: PinModel!
-    var imgModel: ImgModel!
     var nSBlockOp: [NSBlockOperation] = []
     
     var selectedForDelete = [ImgModel]()
@@ -146,16 +145,30 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
             cell.flickrImageView.image = image
             print("Image.image \(image)")
             self.saveContext()
-            //addSpinner(cell, activityBool: true)
+            cell.indicatorView.stopAnimating()
         }else {
             print("Adding new images to cells...")
+            cell.indicatorView.startAnimating()
             cell.flickrImageView.image = nil
             
-                    imageController.loadUpdateHandler = {[unowned self] () -> Void in
-                        dispatch_async(dispatch_get_main_queue(), {
-                            self.collectionView.reloadItemsAtIndexPaths([indexPath])
-                        })
-                        }
+            imageController.loadUpdateHandler = {[unowned self] () -> Void in
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                })
+            }
+            
+            if cell.flickrImageView.image == nil {
+                let currentImage = UIImage(named: "positive.png")
+                let nextImage = UIImage(named: "negative.png")
+                let crossFade = CABasicAnimation(keyPath:"contents")
+                crossFade.duration = 2
+                crossFade.fromValue = currentImage!.CGImage
+                crossFade.toValue = nextImage!.CGImage
+                cell.flickrImageView.layer.addAnimation(crossFade, forKey:"animateContents")
+                cell.flickrImageView.image = nextImage
+            }else {
+                cell.indicatorView.stopAnimating()
+            }
         }
     }
     
@@ -167,6 +180,7 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         
         for cell in selectedForDelete {
             sharedContext.deleteObject(cell)
+
         }
         
         deleteBtn.hidden = true
@@ -279,26 +293,6 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
             }, completion: { (finished) -> Void in
                 self.nSBlockOp.removeAll(keepCapacity: false)
         })
-        
-    }
-    
-    func addSpinner(cellView: UIImageView, activityBool: Bool){
-        
-        let activitySpinner = UIActivityIndicatorView.init(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
-        activitySpinner.center = cellView.center
-        activitySpinner.color = UIColor.whiteColor()
-        activitySpinner.startAnimating()
-        
-        if activityBool == true{
-            activitySpinner.startAnimating()
-            cellView.addSubview(activitySpinner)
-        }else if activityBool == false{
-            activitySpinner.stopAnimating()
-            cellView.willRemoveSubview(activitySpinner)
-        }
-    }
-    
-    func removeSpinner(){
         
     }
     

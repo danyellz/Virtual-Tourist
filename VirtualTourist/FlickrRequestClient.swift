@@ -119,6 +119,7 @@ class FlickrRequestClient: NSObject {
                 dispatch_async(dispatch_get_main_queue()) {
                     let photo = UIImage(data: data)
                     image.image = photo!
+                    image.imageData = data
                 }
             }
         }
@@ -176,6 +177,8 @@ class FlickrRequestClient: NSObject {
         
         let data = UIImagePNGRepresentation(image!)!
         data.writeToFile(path, atomically: true)
+        
+        
         
         print("ImageFile:\(image)")
     }

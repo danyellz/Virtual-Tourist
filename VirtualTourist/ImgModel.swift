@@ -19,6 +19,7 @@ class ImgModel: NSManagedObject {
     @NSManaged var url: String?
     @NSManaged var id : String?
     @NSManaged var path: String?
+    @NSManaged var imageData: NSData?
     @NSManaged var pin: PinModel?
     
     var loadUpdateHandler: (() -> Void)?
@@ -55,6 +56,7 @@ class ImgModel: NSManagedObject {
     var image: UIImage? {
         
         get {
+            print("IMAGEDATA: \(imageData)")
             return FlickrRequestClient.sharedInstance().retrieveImageForStorage(id)
         }
         set{

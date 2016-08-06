@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="10174" systemVersion="16A201w" minimumToolsVersion="Xcode 7.0">
     <entity name="Image" representedClassName="ImgModel" syncable="YES">
-        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" allowsExternalBinaryDataStorage="YES" syncable="YES"/>
+        <attribute name="imageData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES" syncable="YES"/>
         <attribute name="path" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="url" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="url" optional="YES" attributeType="String" allowsExternalBinaryDataStorage="YES" syncable="YES"/>
         <relationship name="pin" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Pin" inverseName="images" inverseEntity="Pin" syncable="YES"/>
     </entity>
     <entity name="Pin" representedClassName="PinModel" syncable="YES">
@@ -12,7 +13,7 @@
         <relationship name="images" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Image" inverseName="pin" inverseEntity="Image" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Image" positionX="-54" positionY="-9" width="128" height="105"/>
+        <element name="Image" positionX="-54" positionY="-9" width="128" height="120"/>
         <element name="Pin" positionX="-63" positionY="-18" width="128" height="90"/>
     </elements>
 </model>

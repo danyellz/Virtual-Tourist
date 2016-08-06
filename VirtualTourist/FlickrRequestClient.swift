@@ -17,8 +17,11 @@ class FlickrRequestClient: NSObject {
     
     var session: NSURLSession
     var pin: PinModel? = nil
+    var image: ImgModel?
+    var pinDetailVC: PinDetailView!
+    var imageCVCell: ImageCollectionCell!
     
-    override init(){
+    private override init(){
         session = NSURLSession.sharedSession()
         super.init()
     }
@@ -33,7 +36,7 @@ class FlickrRequestClient: NSObject {
         CoreDataStack.sharedInstance().saveContext()
     }
     
-    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: Int?, error: NSError?) -> Void)){
+    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: AnyObject! , error: NSError?) -> Void)) -> Void{
         
         print("Fetching photos at pin location")
         
@@ -73,9 +76,10 @@ class FlickrRequestClient: NSObject {
                 photoAddedToModel.id = String(randomInt)
             }
             
-            self.getPinImageData(pin)
+            dispatch_async(dispatch_get_main_queue()) {
+                self.getPinImageData(pin)
+            }
             
-            self.saveContext()
             completionHandler(numberFetched: retrievedPhotos, error: nil)
         }
         
@@ -103,27 +107,31 @@ class FlickrRequestClient: NSObject {
             FlickrRESTClient.sharedInstance().getImageDataTask(image) {(data, errorString) in
                 guard let data = data else{
                     print("Error with getPinImageData: \(errorString)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        image.loadUpdateHandler = nil
+                    }
                     return
                 }
                 
-                let photo = UIImage(data: data)
-                image.image = photo!
-                self.saveContext()
+                dispatch_async(dispatch_get_main_queue()) {
+                    let photo = UIImage(data: data)
+                    image.image = photo!
+                }
             }
         }
     }
     
     func getNewGeoImgs(pin: PinModel){
-        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) -> Void in
+        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) in
             print("Initial fetch complete!: \(totalFetched)")
-            
             if let error = error{
                 print(error)
             }else {
-                dispatch_async(dispatch_get_main_queue(), {
+                dispatch_async(dispatch_get_main_queue()) {
                     self.saveContext()
-                })
+                }
             }
+        
         })
     }
     
@@ -132,11 +140,14 @@ class FlickrRequestClient: NSObject {
         if url == nil || url! == "" {
             return nil
         }
+        
         let path = pathForIdentifier(url!)
         print("Path: \(path)")
+        
         if let image = memoryCache.objectForKey(path) as? UIImage {
             return image
         }
+        
         if let data = NSData(contentsOfFile: path){
             return UIImage(data: data)
         }
@@ -144,20 +155,22 @@ class FlickrRequestClient: NSObject {
     }
     
     func saveImage(image: UIImage?, withURL url: String) {
+        print("Saving image data")
         let path = pathForIdentifier(url)
         print("Path\(path)")
         
         if image == nil {
-            memoryCache.removeObjectForKey(path)
+                self.memoryCache.removeObjectForKey(path)
             
             do{
                 try NSFileManager.defaultManager().removeItemAtPath(url)
-            }catch{}
+            }catch _ {}
             
             return
         }
         
         memoryCache.setObject(image!, forKey: path)
+        
         let data = UIImagePNGRepresentation(image!)!
         data.writeToFile(path, atomically: true)
         
@@ -167,6 +180,7 @@ class FlickrRequestClient: NSObject {
     func pathForIdentifier(identifier: String) -> String {
         let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
         let fullURL = documentsDirectoryURL.URLByAppendingPathComponent(identifier)
+        
         return fullURL.path!
     }
     

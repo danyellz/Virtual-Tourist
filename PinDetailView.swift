@@ -7,7 +7,7 @@
 //
 
 /*Referenced https://stackoverflow.com/questions/12656648/uicollectionview-performing-updates-using-performbatchupdates 
- to get the solution for NSFetchResultsController delegate methods*/
+ to get the solution for NSFetchResultsController delegate methods. */
 
 import UIKit
 import MapKit
@@ -17,10 +17,15 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var deleteBtn: UIButton!
+    @IBOutlet weak var loadBtn: UIButton!
     
     var selectedPin: PinModel!
     var imgModel: ImgModel!
-    var shouldReloadCollectionView: Bool?
+    var nSBlockOp: [NSBlockOperation] = []
+    
+    var selectedForDelete = [ImgModel]()
+    var selectedIndexes = [NSIndexPath]()
     
     var insertedIndex: [NSIndexPath]!
     var updatedIndex: [NSIndexPath]!
@@ -35,9 +40,10 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         mapView.delegate = self
         mapView.centerCoordinate = selectedPin.coordinate
         mapView.addAnnotation(selectedPin)
+        mapView.userInteractionEnabled = false
         
+        deleteBtn.hidden = true
         configureCollectionView()
-        
         fetchImagesForPin()
     }
     
@@ -56,7 +62,10 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     func fetchImagesForPin(){
         do{
            try fetchedResultsController.performFetch()
-        }catch{}
+        }catch{
+            let fetchError = error as NSError
+            print("Fetch error: \(fetchError)")
+        }
     }
     
     @IBAction func newCollectionBtn(sender: AnyObject) {
@@ -69,8 +78,10 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
                 let newImg = object as! ImgModel
                 self.sharedContext.deleteObject(newImg)
             }
+                self.saveContext()
         }
-        FlickrRequestClient.sharedInstance().getNewGeoImgs(selectedPin)
+
+        FlickrRequestClient.sharedInstance().getNewGeoImgs(self.selectedPin)
     }
     
     var sharedContext: NSManagedObjectContext {
@@ -90,6 +101,9 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: self.sharedContext,
                                                                   sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
         return fetchedResultsController
     }()
     
@@ -116,74 +130,159 @@ class PinDetailView: UIViewController, MKMapViewDelegate, UICollectionViewDataSo
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("DetailCell", forIndexPath: indexPath) as! ImageCollectionCell
-        let image = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
         
-        configureUI(cell, image: image, atIndexPath: indexPath)
+        configureUI(cell, atIndexPath: indexPath)
+        
         return cell
     }
     
-    func configureUI(cell: ImageCollectionCell, image: ImgModel, atIndexPath indexPath: NSIndexPath) {
+    func configureUI(cell: ImageCollectionCell, atIndexPath indexPath: NSIndexPath) {
         
-        if image.image != nil{
-            image.loadUpdateHandler = nil
-            cell.flickrImageView.image = image.image!
-            print("Image.image \(image.image!)")
+        let imageController = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
+        
+        if let image = imageController.image{
+            print("Images already exist in cells...")
+            imageController.loadUpdateHandler = nil
+            cell.flickrImageView.image = image
+            print("Image.image \(image)")
             self.saveContext()
             //addSpinner(cell, activityBool: true)
-        }else{
-            image.loadUpdateHandler = {[unowned self] () -> Void in
-            dispatch_async(dispatch_get_main_queue(), {
-            self.collectionView.reloadData()
-                })
-            }
-            cell.flickrImageView.image = image.image
-            //addSpinner(cell, activityBool: false)
+        }else {
+            print("Adding new images to cells...")
+            cell.flickrImageView.image = nil
+            
+                    imageController.loadUpdateHandler = {[unowned self] () -> Void in
+                        dispatch_async(dispatch_get_main_queue(), {
+                            self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                        })
+                        }
         }
+    }
+    
+
+    @IBAction func deleteSelectedImgs(sender: AnyObject) {
+        for selectedItems in selectedIndexes {
+            selectedForDelete.append(fetchedResultsController.objectAtIndexPath(selectedItems) as! ImgModel)
+        }
+        
+        for cell in selectedForDelete {
+            sharedContext.deleteObject(cell)
+        }
+        
+        deleteBtn.hidden = true
+        loadBtn.hidden = false
+        
+        saveContext()
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath){
-        if collectionView.cellForItemAtIndexPath(indexPath) != nil {
-            let image = fetchedResultsController.objectAtIndexPath(indexPath) as! ImgModel
-            print(image)
+
+            let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ImageCollectionCell
+            print(cell)
+        
+        if let selectedIndex = selectedIndexes.indexOf(indexPath) {
+            cell.layer.borderWidth = 0
+            cell.layer.borderColor = UIColor.clearColor().CGColor
+            selectedIndexes.removeAtIndex(selectedIndex)
+        }else {
+            cell.layer.borderWidth = 2;
+            cell.layer.borderColor = UIColor.redColor().CGColor
+            selectedIndexes.append(indexPath)
         }
+        
+            if selectedIndexes.count > 0 {
+                loadBtn.hidden = true
+                deleteBtn.hidden = false
+            }else {
+                loadBtn.hidden = false
+                deleteBtn.hidden = true
+            }
     }
 
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        nSBlockOp.removeAll(keepCapacity: false)
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
         
-        insertedIndex = [NSIndexPath]()
-        updatedIndex = [NSIndexPath]()
-        deletedIndex = [NSIndexPath]()
+        switch type {
+        case .Insert:
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.insertSections(NSIndexSet(index: sectionIndex))
+                    }
+                    })
+            )
+        case .Delete:
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.deleteSections(NSIndexSet(index: sectionIndex))
+                    }
+                    })
+            )
+        default:
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.reloadSections(NSIndexSet(index: sectionIndex))
+                    }
+                    })
+            )
+        }
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
         switch type {
         case .Insert:
-            insertedIndex.append(newIndexPath!)
-        case .Update:
-            updatedIndex.append(indexPath!)
-        case .Move:
-            print("Surprise!")
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.insertItemsAtIndexPaths([newIndexPath!])
+                    }
+                    })
+            )
         case .Delete:
-            deletedIndex.append(indexPath!)
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.deleteItemsAtIndexPaths([indexPath!])
+                    }
+                    })
+            )
+        case .Update:
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.reloadItemsAtIndexPaths([indexPath!])
+                    }
+                    })
+            )
+        case .Move:
+            nSBlockOp.append(
+                NSBlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.moveItemAtIndexPath(indexPath!, toIndexPath: newIndexPath!)
+                    }
+                    })
+            )
         }
     }
-
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        collectionView.performBatchUpdates({() -> Void in
-            for indexPath in self.insertedIndex {
-                self.collectionView.insertItemsAtIndexPaths([indexPath])
+        
+        collectionView.performBatchUpdates({ () -> Void in
+            for blockOperation in self.nSBlockOp {
+                blockOperation.start()
             }
-            for indexPath in self.updatedIndex {
-                self.collectionView.reloadItemsAtIndexPaths([indexPath])
-            }
-            for indexPath in self.deletedIndex {
-                self.collectionView.deleteItemsAtIndexPaths([indexPath])
-            }
-            },completion: nil)
+            }, completion: { (finished) -> Void in
+                self.nSBlockOp.removeAll(keepCapacity: false)
+        })
         
     }
     
-    func addSpinner(cellView: UICollectionViewCell, activityBool: Bool){
+    func addSpinner(cellView: UIImageView, activityBool: Bool){
         
         let activitySpinner = UIActivityIndicatorView.init(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
         activitySpinner.center = cellView.center

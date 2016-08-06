@@ -3,6 +3,8 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -104,6 +106,15 @@
                                     <outlet property="delegate" destination="og5-1Y-8cd" id="bDz-AM-Giz"/>
                                 </connections>
                             </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bR0-6V-6fq">
+                                <rect key="frame" x="0.0" y="553" width="600" height="47"/>
+                                <state key="normal" title="Delete Selected">
+                                    <color key="titleColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="deleteSelectedImgs:" destination="og5-1Y-8cd" eventType="touchUpInside" id="Aaz-CB-xQ4"/>
+                                </connections>
+                            </button>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="QsL-Ae-iWE">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="236"/>
                                 <constraints>
@@ -117,20 +128,25 @@
                                 <rect key="frame" x="0.0" y="553" width="600" height="47"/>
                                 <state key="normal" title="Load More"/>
                                 <connections>
-                                    <action selector="newCollectionBtn:" destination="og5-1Y-8cd" eventType="touchUpInside" id="bwS-1p-ntm"/>
+                                    <action selector="newCollectionBtn:" destination="og5-1Y-8cd" eventType="touchUpInside" id="S26-e2-PG1"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="bR0-6V-6fq" firstAttribute="top" secondItem="ieX-jG-iFA" secondAttribute="top" id="17w-cS-mg6"/>
+                            <constraint firstItem="bR0-6V-6fq" firstAttribute="firstBaseline" secondItem="ieX-jG-iFA" secondAttribute="baseline" id="6t6-7X-uTa"/>
                             <constraint firstItem="45D-Aw-cSU" firstAttribute="bottom" secondItem="aAI-lh-sk4" secondAttribute="top" constant="-47" id="BkG-5U-svm"/>
                             <constraint firstAttribute="trailingMargin" secondItem="ieX-jG-iFA" secondAttribute="trailing" constant="-20" id="HsJ-vh-STh"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="leading" secondItem="dKY-HI-SZc" secondAttribute="leading" id="K6g-XC-ZOh"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="trailing" secondItem="45D-Aw-cSU" secondAttribute="trailing" id="NcO-aL-F8C"/>
+                            <constraint firstItem="bR0-6V-6fq" firstAttribute="leading" secondItem="ieX-jG-iFA" secondAttribute="leading" id="Tuc-3e-2LB"/>
+                            <constraint firstItem="bR0-6V-6fq" firstAttribute="baseline" secondItem="ieX-jG-iFA" secondAttribute="firstBaseline" id="UGc-vL-E4O"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="leading" secondItem="45D-Aw-cSU" secondAttribute="leading" id="ZGM-Jr-bqd"/>
                             <constraint firstItem="ieX-jG-iFA" firstAttribute="top" secondItem="45D-Aw-cSU" secondAttribute="bottom" id="bPY-b3-ehX"/>
                             <constraint firstItem="45D-Aw-cSU" firstAttribute="top" secondItem="QsL-Ae-iWE" secondAttribute="bottom" id="eD6-vn-Qt2"/>
                             <constraint firstItem="ieX-jG-iFA" firstAttribute="leading" secondItem="dKY-HI-SZc" secondAttribute="leadingMargin" constant="-20" id="hHw-e0-qmZ"/>
+                            <constraint firstItem="bR0-6V-6fq" firstAttribute="trailing" secondItem="ieX-jG-iFA" secondAttribute="trailing" id="kzv-vo-3h4"/>
                             <constraint firstItem="QsL-Ae-iWE" firstAttribute="top" secondItem="dKY-HI-SZc" secondAttribute="top" id="qpQ-jj-GbA"/>
                             <constraint firstItem="aAI-lh-sk4" firstAttribute="top" secondItem="ieX-jG-iFA" secondAttribute="bottom" id="yjt-fJ-0JH"/>
                             <constraint firstAttribute="trailing" secondItem="QsL-Ae-iWE" secondAttribute="trailing" id="zhE-9A-124"/>
@@ -138,12 +154,14 @@
                     </view>
                     <connections>
                         <outlet property="collectionView" destination="45D-Aw-cSU" id="OCV-PF-r8O"/>
+                        <outlet property="deleteBtn" destination="bR0-6V-6fq" id="e3u-pn-sUF"/>
+                        <outlet property="loadBtn" destination="ieX-jG-iFA" id="Xgq-Sv-WY9"/>
                         <outlet property="mapView" destination="QsL-Ae-iWE" id="qiy-RM-P0U"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xcx-68-xjQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1969" y="227"/>
+            <point key="canvasLocation" x="1929" y="311"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="D7j-RS-qsg">

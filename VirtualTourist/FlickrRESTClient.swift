@@ -54,7 +54,9 @@ class FlickrRESTClient: NSObject {
                 return
             }
             
-            FlickrRESTClient.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandler)
+            dispatch_async(dispatch_get_main_queue()) {
+                FlickrRESTClient.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandler)
+            }
         }
         task.resume()
         
@@ -83,12 +85,10 @@ class FlickrRESTClient: NSObject {
         errorString: String?) -> Void) {
         
         if let imageURL = NSURL(string: image.url!){
-        print("URL: \(imageURL)")
             taskForImageData(imageURL) {data, error in
             if error != nil{
                 completionHandler(data: nil, errorString: "Error downloading \(error)")
             }else{
-                print("Result: \(data)")
                 completionHandler(data: data, errorString: nil)
             }
         }
@@ -96,6 +96,7 @@ class FlickrRESTClient: NSObject {
     }
     
     func taskForImageData(url: NSURL, completionHandler: (imageData: NSData?, error: NSError?) -> Void) -> NSURLSessionTask{
+        print("Image url: \(url)")
         let request = NSURLRequest(URL: url)
         
         let task = session.dataTaskWithRequest(request) {data, response, downloadError in

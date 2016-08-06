@@ -48,6 +48,8 @@ extension FlickrRequestClient{
     
     struct FlickrValues{
         static let URL_M = "url_m"
+        static let Path = "path"
+        static let ID = "id"
         static let JSON = "json"
         static let Pages = "pages"
         static let NoJSONCB = "1"

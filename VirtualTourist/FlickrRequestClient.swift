@@ -6,17 +6,22 @@
 //  Copyright © 2016 Ty Daniels. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreLocation
 import CoreFoundation
 import CoreData
 
 class FlickrRequestClient: NSObject {
     
+    private var memoryCache = NSCache()
+    
     var session: NSURLSession
     var pin: PinModel? = nil
+    var image: ImgModel?
+    var pinDetailVC: PinDetailView!
+    var imageCVCell: ImageCollectionCell!
     
-    override init(){
+    private override init(){
         session = NSURLSession.sharedSession()
         super.init()
     }
@@ -27,18 +32,23 @@ class FlickrRequestClient: NSObject {
         return CoreDataStack.sharedInstance().managedObjectContext
     }
     
-    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: Int?, error: NSError?) -> Void)){
+    func saveContext() {
+        CoreDataStack.sharedInstance().saveContext()
+    }
+    
+    func fetchPhotosAtPin(pin: PinModel, completionHandler:((numberFetched: AnyObject! , error: NSError?) -> Void)) {
         
         print("Fetching photos at pin location")
         
         fetchPhotosAtGeo(pin.coordinate, fromPage: 1, total: 21){ (json, error) in
             if let error = error{
                 print("Error during fetch in fetchPhotosAtGeo: \(error)")
+                completionHandler(numberFetched: nil, error: error)
                 return
             }
         
         var jsonError: NSError? = nil
-        var result: (photoURLs: [String], pages: Int)?
+            var result: (photoURLs: [String], pages: Int)?
         do{
             result = try self.getImagesFromJSON(json!)
             print(result)
@@ -63,24 +73,118 @@ class FlickrRequestClient: NSObject {
                 //Append photos to pin instance in CoreData
                 let photoAddedToModel = ImgModel(dictionary: photoDic, context: self.sharedContext)
                 photoAddedToModel.pin = pin
-                print(pin)
+                let randomInt = NSInteger(arc4random_uniform(100000) + 1)
+                photoAddedToModel.id = String(randomInt)
+            }
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                self.getPinImageData(pin)
             }
             
             completionHandler(numberFetched: retrievedPhotos, error: nil)
         }
+        
     }
+    
+    
     func fetchPhotosAtGeo(coordinate: CLLocationCoordinate2D, fromPage page: Int, total: Int, completionHandler:((jsonResponse: AnyObject!, error: NSError?) -> Void)) {
         
+        let randomInt = Int(arc4random_uniform(100) + 1)
+        
         print("Fetching json at geo with parameters")
-        let parameters = paginateImageLocationSearch(coordinate, page: page, perPage: total)
+        let parameters = paginateImageLocationSearch(coordinate, page: randomInt, perPage: total)
         
         flickrClient.taskForGetMethod(FlickrRequestClient.BaseRefs.BaseURL, parameters: parameters) {(result, error) -> Void in
+            
             if let error = error{
+                print("taskForGetError in fetchPhotosAtGeo")
                 completionHandler(jsonResponse: nil, error: error)
                 return
             }
             completionHandler(jsonResponse: result, error: nil)
         }
+    }
+    
+    func getPinImageData(pin: PinModel){
+        for image in pin.images {
+            FlickrRESTClient.sharedInstance().getImageDataTask(image) {(data, errorString) in
+                guard let data = data else{
+                    print("Error with getPinImageData: \(errorString)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        image.loadUpdateHandler = nil
+                    }
+                    return
+                }
+                
+                dispatch_async(dispatch_get_main_queue()) {
+                    let photo = UIImage(data: data)
+                    image.image = photo!
+                }
+            }
+        }
+    }
+    
+    func getNewGeoImgs(pin: PinModel){
+        FlickrRequestClient.sharedInstance().fetchPhotosAtPin(pin, completionHandler: {(totalFetched, error) in
+            print("Initial fetch complete!: \(totalFetched)")
+            if let error = error{
+                print(error)
+            }else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.saveContext()
+                }
+            }
+        
+        })
+    }
+    
+    func retrieveImageForStorage(url: String?) -> UIImage? {
+        print("Retrieving image data!")
+        if url == nil || url! == "" {
+            return nil
+        }
+        
+        let path = pathForIdentifier(url!)
+        print("Path: \(path)")
+        
+        if let image = memoryCache.objectForKey(path) as? UIImage {
+            return image
+        }
+        
+        if let data = NSData(contentsOfFile: path){
+            return UIImage(data: data)
+        }
+        return nil
+    }
+    
+    func saveImage(image: UIImage?, withURL url: String) {
+        print("Saving image data")
+        let path = pathForIdentifier(url)
+        print("Path\(path)")
+        
+        if image == nil {
+                self.memoryCache.removeObjectForKey(path)
+            
+            do{
+                try NSFileManager.defaultManager().removeItemAtPath(url)
+            }catch _ {}
+            
+            return
+        }
+        
+        memoryCache.setObject(image!, forKey: path)
+        
+        let data = UIImagePNGRepresentation(image!)!
+        data.writeToFile(path, atomically: true)
+        
+        print("ImageFile:\(image)")
+    }
+    
+    func pathForIdentifier(identifier: String) -> String {
+        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        let fullURL = documentsDirectoryURL.URLByAppendingPathComponent(identifier)
+        
+        return fullURL.path!
     }
     
     class func errorForJSONInterpreting(json: AnyObject!) -> NSError {
@@ -120,7 +224,6 @@ extension FlickrRequestClient{
                     var result:[String] = [String]()
                     for item in photoList{
                         if let url = item[FlickrValues.URL_M] as? String {
-                            
                             result.append(url)
                         }
                     }

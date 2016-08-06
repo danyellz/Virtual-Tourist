@@ -6,4 +6,12 @@
 //  Copyright © 2016 Ty Daniels. All rights reserved.
 //
 
-import Foundation
+import UIKit
+
+class ImageCollectionCell: UICollectionViewCell {
+    
+    @IBOutlet weak var flickrImageView: UIImageView!
+    
+    @IBOutlet weak var indicatorView: UIActivityIndicatorView!
+    
+}

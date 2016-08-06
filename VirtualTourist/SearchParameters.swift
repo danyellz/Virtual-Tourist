@@ -14,8 +14,8 @@ extension FlickrRequestClient{
     //A dictionary of base parameters to build upon for Flickr API requests
     func baseParameters() -> NSMutableDictionary {
         let result = [
-            FlickrKeys.Method : BaseRefs.SearchMethod,
             FlickrKeys.APIKey : BaseRefs.APIKey,
+            FlickrKeys.Method : BaseRefs.SearchMethod,
             FlickrKeys.SafeSearch : FlickrValues.SafeSearch,
             FlickrKeys.Extras : FlickrValues.URL_M,
             FlickrKeys.Format : FlickrValues.JSON,

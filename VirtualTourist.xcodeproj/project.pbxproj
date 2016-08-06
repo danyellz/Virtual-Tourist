@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		102658291D14C66100BA6184 /* PinDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102658281D14C66100BA6184 /* PinDetailView.swift */; };
 		1064D9591D0FFDD6000B300F /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1064D9581D0FFDD6000B300F /* MapKit.framework */; };
+		10A77AC61D14EE6F00935AA9 /* ImageCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A77AC51D14EE6F00935AA9 /* ImageCollectionCell.swift */; };
 		10FF46181D0642A60034FA3F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46171D0642A60034FA3F /* AppDelegate.swift */; };
-		10FF461A1D0642A60034FA3F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FF46191D0642A60034FA3F /* ViewController.swift */; };
 		10FF461D1D0642A60034FA3F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10FF461B1D0642A60034FA3F /* Main.storyboard */; };
 		10FF461F1D0642A60034FA3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10FF461E1D0642A60034FA3F /* Assets.xcassets */; };
 		10FF46221D0642A60034FA3F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10FF46201D0642A60034FA3F /* LaunchScreen.storyboard */; };
@@ -47,9 +47,9 @@
 /* Begin PBXFileReference section */
 		102658281D14C66100BA6184 /* PinDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinDetailView.swift; sourceTree = "<group>"; };
 		1064D9581D0FFDD6000B300F /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		10A77AC51D14EE6F00935AA9 /* ImageCollectionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCollectionCell.swift; sourceTree = "<group>"; };
 		10FF46141D0642A60034FA3F /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10FF46171D0642A60034FA3F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		10FF46191D0642A60034FA3F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		10FF461C1D0642A60034FA3F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		10FF461E1D0642A60034FA3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		10FF46211D0642A60034FA3F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -125,7 +125,6 @@
 			isa = PBXGroup;
 			children = (
 				10FF46171D0642A60034FA3F /* AppDelegate.swift */,
-				10FF46191D0642A60034FA3F /* ViewController.swift */,
 				10FF461B1D0642A60034FA3F /* Main.storyboard */,
 				10FF461E1D0642A60034FA3F /* Assets.xcassets */,
 				10FF46201D0642A60034FA3F /* LaunchScreen.storyboard */,
@@ -181,6 +180,7 @@
 			children = (
 				10FF465B1D06C91D0034FA3F /* MainAnnotationView.swift */,
 				102658281D14C66100BA6184 /* PinDetailView.swift */,
+				10A77AC51D14EE6F00935AA9 /* ImageCollectionCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -324,10 +324,10 @@
 			files = (
 				10FF46601D0FDE700034FA3F /* ImgModel.swift in Sources */,
 				10FF464E1D06858A0034FA3F /* Constants.swift in Sources */,
+				10A77AC61D14EE6F00935AA9 /* ImageCollectionCell.swift in Sources */,
 				10FF46471D0643C00034FA3F /* CoreDataStack.swift in Sources */,
 				102658291D14C66100BA6184 /* PinDetailView.swift in Sources */,
 				10FF46521D068B500034FA3F /* SearchParameters.swift in Sources */,
-				10FF461A1D0642A60034FA3F /* ViewController.swift in Sources */,
 				10FF465C1D06C91D0034FA3F /* MainAnnotationView.swift in Sources */,
 				10FF46181D0642A60034FA3F /* AppDelegate.swift in Sources */,
 				10FF46581D06BE030034FA3F /* PinModel.swift in Sources */,
